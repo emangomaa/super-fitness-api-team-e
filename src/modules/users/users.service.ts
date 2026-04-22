@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserProfileRepository } from './repository/user-profile.repository';
 import { Gender } from './dto/gender.type';
+import { User } from './entities/user.entity';
 
 
 @Injectable()
@@ -15,7 +16,7 @@ export class UsersService {
 
     if (!profile) {
       profile = await this.usersProfileRepository.create({
-        user: { id: userId } as any,
+        user: { id: userId } as User,
         registration_step: 0,
       });
     }

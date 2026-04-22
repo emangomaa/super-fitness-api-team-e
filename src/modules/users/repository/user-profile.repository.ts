@@ -5,7 +5,7 @@ import { UserProfile } from '../entities/complete.register.entity';
 
 @Injectable()
 export class UserProfileRepository extends AbstractRepository<UserProfile> {
-  protected readonly tableName = 'user_profiles';
+    protected readonly entity = UserProfile;
 
   constructor(dataSource: DataSource) {
     super(dataSource);

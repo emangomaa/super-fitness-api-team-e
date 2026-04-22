@@ -1,54 +1,46 @@
-import { DataSource, ObjectLiteral } from 'typeorm';
-
-export interface FindAllOptions {
-  where?: string; // "age > $1 AND status = $2"
-  params?: any[]; // [18, 'active']
-  orderBy?: string; // "created_at DESC"
-  page?: number;
-  limit?: number;
-  select?: string; // "id, name, email"
-}
+import { DataSource, EntityTarget, ObjectLiteral } from 'typeorm';
+import { FindAllOptions } from './types/findAllOptions';
 
 export abstract class AbstractRepository<T extends ObjectLiteral> {
-  protected abstract readonly tableName: string;
+  protected abstract readonly entity: EntityTarget<T>;
 
   constructor(protected readonly dataSource: DataSource) {}
+
+  protected get repository() {
+    return this.dataSource.getRepository(this.entity);
+  }
 
   async findAll(options: FindAllOptions = {}) {
     const {
       where = '1=1',
-      params = [],
-      orderBy = 'id DESC',
+      params = {},
+      orderBy = 'id',
+      orderDirection = 'DESC',
       page = 1,
       limit = 10,
-      select = '*',
+      select,
     } = options;
 
-    const offset = (page - 1) * limit;
+    const qb = this.repository.createQueryBuilder('e');
 
-    // كويري البيانات
-    const dataQuery = `
-      SELECT ${select}
-      FROM ${this.tableName}
-      WHERE ${where}
-      ORDER BY ${orderBy}
-      LIMIT $${params.length + 1} OFFSET $${params.length + 2}
-    `;
+    // select
+    if (select) {
+      qb.select(select);
+    }
 
-    // كويري العدد الكلي (Pagination)
-    const countQuery = `
-      SELECT COUNT(*) as count FROM ${this.tableName} WHERE ${where}
-    `;
+    // where
+    qb.where(where, params);
 
- const [data, countResult] = await Promise.all([
-  this.dataSource.query(dataQuery, [...params, limit, offset]),
-  this.dataSource.query(countQuery, params),
-]);
+    // order
+    qb.orderBy(`e.${orderBy}`, orderDirection);
 
-    const totalSize = parseInt(countResult[0].count);
+    // pagination
+    qb.skip((page - 1) * limit).take(limit);
+
+    const [data, totalSize] = await qb.getManyAndCount();
 
     return {
-      data: data,
+      data,
       totalSize,
       totalPages: Math.ceil(totalSize / limit),
       pageSize: limit,
@@ -56,61 +48,46 @@ export abstract class AbstractRepository<T extends ObjectLiteral> {
     };
   }
 
-  async findOne(where: string, params: any[] = []): Promise<T | null> {
-    const query = `SELECT * FROM ${this.tableName} WHERE ${where} LIMIT 1`;
-    const result = await this.dataSource.query(query, params);
-    return result[0] || null;
+  async findOne(where: string, params: Record<string, any> = {}): Promise<T | null> {
+    return this.repository
+      .createQueryBuilder('e')
+      .where(where, params)
+      .getOne();
   }
 
-  async create(data: Partial<T>): Promise<T> {
-    const keys = Object.keys(data);
-    const values = Object.values(data);
-    const columns = keys.join(', ');
-    const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+async create(data: Partial<T>): Promise<T> {
+  const entity = this.repository.create(data as T);
+  return await this.repository.save(entity);
+}
 
-    const query = `
-      INSERT INTO ${this.tableName} (${columns})
-      VALUES (${placeholders})
-      RETURNING *
-    `;
-
-    const result = await this.dataSource.query(query, values);
-    return result[0];
-  }
 
   async update(
     where: string,
-    whereParams: any[],
+    params: Record<string, any>,
     data: Partial<T>,
   ): Promise<T | null> {
-    const keys = Object.keys(data);
-    const values = Object.values(data);
+    await this.repository
+      .createQueryBuilder()
+      .update(this.entity)
+      .set(data)
+      .where(where, params)
+      .execute();
 
-    // بناء الـ SET clause
-    const setClause = keys.map((key, i) => `${key} = $${i + 1}`).join(', ');
-
-    // ضبط ترتيب الـ placeholders للـ WHERE
-    const whereClauseWithProperIndices = where.replace(/\$(\d+)/g, (_, n) => {
-      return `$${parseInt(n) + keys.length}`;
-    });
-
-    const query = `
-      UPDATE ${this.tableName}
-      SET ${setClause}
-      WHERE ${whereClauseWithProperIndices}
-      RETURNING *
-    `;
-
-    const result = await this.dataSource.query(query, [
-      ...values,
-      ...whereParams,
-    ]);
-    return result[0] || null;
+    return this.findOne(where, params);
   }
 
-  async delete(where: string, params: any[] = []): Promise<T | null> {
-    const query = `DELETE FROM ${this.tableName} WHERE ${where} RETURNING *`;
-    const result = await this.dataSource.query(query, params);
-    return result[0] || null;
+  async delete(where: string, params: Record<string, any> = {}): Promise<T | null> {
+    const entity = await this.findOne(where, params);
+
+    if (!entity) return null;
+
+    await this.repository
+      .createQueryBuilder()
+      .delete()
+      .from(this.entity)
+      .where(where, params)
+      .execute();
+
+    return entity;
   }
 }
