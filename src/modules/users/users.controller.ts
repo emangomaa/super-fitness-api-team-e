@@ -1,44 +1,39 @@
 import {
   Controller,
-  Get,
-  Post,
   Body,
   Patch,
-  Param,
-  Delete,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiResponse } from '@nestjs/swagger';
+import type { AuthRequest } from '../../common/types/req.type';
+import type { Gender } from './dto/gender.type';
+
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  @ApiResponse({ status: 201, description: 'User created successfully' })
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @Patch('gender')
+  updateGender(@Req() req:AuthRequest, @Body('gender') gender: Gender) {
+    const userId = req.user.id;
+    return this.usersService.updateGender(userId, gender);
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @Patch('age')
+  updateAge(@Req() req :AuthRequest, @Body('age') age: number) {
+    const userId = req.user.id;
+    return this.usersService.updateAge(userId, age);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  @Patch('weight')
+  updateWeight(@Req() req :AuthRequest, @Body('weight') weight: number) {
+    const userId = req.user.id;
+    return this.usersService.updateWeight(userId, weight);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  @Patch('height')
+  updateHeight(@Req() req :AuthRequest, @Body('height') height: number) {
+    const userId = req.user.id ;
+    return this.usersService.updateHeight(userId, height);
   }
 }

@@ -1,29 +1,73 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UsersRepository } from './repository/users.repository';
+import { UserProfileRepository } from './repository/user-profile.repository';
+import { Gender } from './dto/gender.type';
+
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(private readonly usersProfileRepository: UserProfileRepository) {}
 
-  create(createUserDto: CreateUserDto) {
-    return this.usersRepository.create(createUserDto);
+  async getOrCreateProfile(userId: string) {
+    let profile = await this.usersProfileRepository.findOne(
+      'user_id = $1',
+      [userId],
+    );
+
+    if (!profile) {
+      profile = await this.usersProfileRepository.create({
+        user: { id: userId } as any,
+        registration_step: 0,
+      });
+    }
+
+    return profile;
   }
 
-  findAll() {
-    return this.usersRepository.findAll();
+  // 🔥 update gender
+  async updateGender(userId: string, gender: Gender) {
+    return this.usersProfileRepository.update(
+      'user_id = $1',
+      [userId],
+      {
+        gender,
+        registration_step: 1,
+      },
+    );
   }
 
-  findOne(id: string) {
-    return this.usersRepository.findOne(`id = $1`, [id]);
+  // 🔥 update age
+  async updateAge(userId: string, age: number) {
+    return this.usersProfileRepository.update(
+      'user_id = $1',
+      [userId],
+      {
+        age,
+        registration_step: 2,
+      },
+    );
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return this.usersRepository.update(`id = $1`, [id], updateUserDto);
+  // 🔥 update weight
+  async updateWeight(userId: string, weight: number) {
+    return this.usersProfileRepository.update(
+      'user_id = $1',
+      [userId],
+      {
+        weight,
+        registration_step: 3,
+      },
+    );
   }
 
-  remove(id: string) {
-    return this.usersRepository.delete(`id = $1`, [id]);
+  // 🔥 update height
+  async updateHeight(userId: string, height: number) {
+    return this.usersProfileRepository.update(
+      'user_id = $1',
+      [userId],
+      {
+        height,
+        registration_step: 4,
+      },
+    );
   }
 }

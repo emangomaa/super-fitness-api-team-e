@@ -40,15 +40,15 @@ export abstract class AbstractRepository<T extends ObjectLiteral> {
       SELECT COUNT(*) as count FROM ${this.tableName} WHERE ${where}
     `;
 
-    const [data, countResult] = await Promise.all([
-      this.dataSource.query(dataQuery, [...params, limit, offset]),
-      this.dataSource.query(countQuery, params),
-    ]);
+ const [data, countResult] = await Promise.all([
+  this.dataSource.query(dataQuery, [...params, limit, offset]),
+  this.dataSource.query(countQuery, params),
+]);
 
     const totalSize = parseInt(countResult[0].count);
 
     return {
-      data: data as T[],
+      data: data,
       totalSize,
       totalPages: Math.ceil(totalSize / limit),
       pageSize: limit,
