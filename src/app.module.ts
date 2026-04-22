@@ -5,6 +5,8 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { OnboardingModule } from './modules/onboarding/onboarding.module';
+import { FileUploadModule } from './common/services/file-upload-service/file-upload.module';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
     UsersModule,
     AuthModule,
+    OnboardingModule,
+    FileUploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

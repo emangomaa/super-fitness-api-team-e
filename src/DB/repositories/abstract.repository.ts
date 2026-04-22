@@ -48,18 +48,20 @@ export abstract class AbstractRepository<T extends ObjectLiteral> {
     };
   }
 
-  async findOne(where: string, params: Record<string, any> = {}): Promise<T | null> {
+  async findOne(
+    where: string,
+    params: Record<string, any> = {},
+  ): Promise<T | null> {
     return this.repository
       .createQueryBuilder('e')
       .where(where, params)
       .getOne();
   }
 
-async create(data: Partial<T>): Promise<T> {
-  const entity = this.repository.create(data as T);
-  return await this.repository.save(entity);
-}
-
+  async create(data: Partial<T>): Promise<T> {
+    const entity = this.repository.create(data as T);
+    return await this.repository.save(entity);
+  }
 
   async update(
     where: string,
@@ -76,7 +78,10 @@ async create(data: Partial<T>): Promise<T> {
     return this.findOne(where, params);
   }
 
-  async delete(where: string, params: Record<string, any> = {}): Promise<T | null> {
+  async delete(
+    where: string,
+    params: Record<string, any> = {},
+  ): Promise<T | null> {
     const entity = await this.findOne(where, params);
 
     if (!entity) return null;
