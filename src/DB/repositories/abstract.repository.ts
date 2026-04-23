@@ -1,10 +1,12 @@
 import { DataSource, EntityTarget, ObjectLiteral } from 'typeorm';
-import { FindAllOptions } from './types/findAllOptions';
+import { FindAllOptions } from '../types/findAllOptions';
 
 export abstract class AbstractRepository<T extends ObjectLiteral> {
   protected abstract readonly entity: EntityTarget<T>;
 
-  constructor(protected readonly dataSource: DataSource) {}
+  constructor(protected readonly dataSource: DataSource) { }
+
+ 
 
   protected get repository() {
     return this.dataSource.getRepository(this.entity);
@@ -48,10 +50,7 @@ export abstract class AbstractRepository<T extends ObjectLiteral> {
     };
   }
 
-  async findOne(
-    where: string,
-    params: Record<string, any> = {},
-  ): Promise<T | null> {
+  async findOne(where: string, params: Record<string, any> = {}): Promise<T | null> {
     return this.repository
       .createQueryBuilder('e')
       .where(where, params)
@@ -62,6 +61,7 @@ export abstract class AbstractRepository<T extends ObjectLiteral> {
     const entity = this.repository.create(data as T);
     return await this.repository.save(entity);
   }
+
 
   async update(
     where: string,
@@ -78,10 +78,7 @@ export abstract class AbstractRepository<T extends ObjectLiteral> {
     return this.findOne(where, params);
   }
 
-  async delete(
-    where: string,
-    params: Record<string, any> = {},
-  ): Promise<T | null> {
+  async delete(where: string, params: Record<string, any> = {}): Promise<T | null> {
     const entity = await this.findOne(where, params);
 
     if (!entity) return null;
