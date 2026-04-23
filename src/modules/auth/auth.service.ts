@@ -1,26 +1,58 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { RegisterDto } from './dto/register.dto';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { UsersRepository } from '../users/repository/users.repository';
+import { ConfigService } from '@nestjs/config';
+import { StringValue } from 'ms';
+import { UserRole } from '../../common/constants/user-role.constants';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    private readonly userRepo: UsersRepository,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
+
+  async register(dto: RegisterDto) {
+    const existingUser = await this.userRepo.findOne('e.email = :email', {
+      email: dto.email,
+    });
+
+    if (existingUser) {
+      throw new BadRequestException('Email already exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+    const user = await this.userRepo.create({
+      ...dto,
+      password: hashedPassword,
+    });
+
+    const tokens = await this.generateTokens(user.id, user.role);
+
+    return tokens;
   }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+  async generateTokens(userId: string, role: UserRole) {
+    const payload = { sub: userId, role };
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('JWT_SECRET'),
+      expiresIn: this.configService.get<StringValue>('JWT_ACCESS_EXPIRES'),
+    });
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      expiresIn:
+        this.configService.get<StringValue>('JWT_REFRESH_EXPIRES') || '7d',
+    });
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    };
   }
 }
