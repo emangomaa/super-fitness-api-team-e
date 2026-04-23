@@ -1,5 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
 import { UserProfile } from './complete.register.entity';
+import { UserRole } from '../../../common/constants/user-role.constants';
 
 @Entity('users')
 export class User {
@@ -17,6 +18,13 @@ export class User {
 
   @Column()
   password: string;
+
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.USER,
+  })
+  role: UserRole;
 
   @OneToOne(() => UserProfile, (profile) => profile.user)
   profile: UserProfile;
