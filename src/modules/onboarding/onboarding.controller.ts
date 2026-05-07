@@ -11,7 +11,7 @@ import {
 import { OnboardingService } from './onboarding.service';
 import { CreateOnboardingPageDto } from './dto/create-onboarding-page.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { multerConfig } from '../../common/services/file-upload-service/config/multer.config';
+import { multerImageConfig } from '../../common/services/file-upload-service/config/multer.config';
 import { FileUploadService } from '../../common/services/file-upload-service/file-upload.service';
 import { ApiBearerAuth, ApiBody, ApiConsumes } from '@nestjs/swagger';
 
@@ -21,7 +21,7 @@ export class OnboardingController {
   constructor(
     private readonly onboardingService: OnboardingService,
     private readonly fileUploadService: FileUploadService,
-  ) { }
+  ) {}
 
   @Get()
   findAll() {
@@ -54,7 +54,7 @@ export class OnboardingController {
       },
     },
   })
-  @UseInterceptors(FileInterceptor('image', multerConfig))
+  @UseInterceptors(FileInterceptor('image', multerImageConfig))
   async createOnboardingPage(
     @UploadedFile() file: Express.Multer.File,
     @Body() body: CreateOnboardingPageDto,

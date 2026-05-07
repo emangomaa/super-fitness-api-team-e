@@ -25,17 +25,29 @@ export class AuthGuard implements CanActivate {
             context.getClass(),
         ])
         if (isPublic) return true
-        const request = context.switchToHttp().getRequest<AuthRequest>(); 
+        const request = context.switchToHttp().getRequest<AuthRequest>();
         const token = this.extractTokenFromHeader(request);
         if (!token) throw new UnauthorizedException();
         try {
-            const payload = this.jwtService.verify<JwtPayload>(token, {
-                secret: this.configService.get('JWT_SECRET')
-            });
-            const user = await this.UsersRepository.findOne(payload.id); 
-            if (!user) throw new UnauthorizedException("user not found");
 
-            const tokenDoc = await this._TokenRepository.findOne('token = :token', { token, isValid: true, userId: user.id });
+
+            const payload = this.jwtService.verify<JwtPayload>(token, {
+                secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET')
+            });
+            const user = await this.UsersRepository.findOne(
+                'e.id = :id',
+                { id: String(payload.id) }
+            );
+            if (!user) throw new UnauthorizedException("user not found");
+            const tokenDoc = await this._TokenRepository.findOne(
+                'e.token = :token AND e.isValid = :isValid AND e.userId = :userId',
+                {
+
+                    token: String(token).trim(),
+                    isValid: true,
+                    userId: user.id,
+                }
+            );
             request.user = user
             if (!tokenDoc) throw new UnauthorizedException("token not found");
         } catch (err) {

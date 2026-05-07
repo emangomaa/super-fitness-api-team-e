@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateOnboardingPageDto } from './dto/update-onboarding-page.dto';
-import { CreateOnboardingPageWithImageDto } from './dto/create-onboarding-page-with-image.dto';
+import { ICreateOnboardingPageWithImage } from './interfaces/create-onboarding-page-with-image.interface';
 import { OnboardingRepository } from './repository/onboarding.repository';
 
 @Injectable()
 export class OnboardingService {
   constructor(private readonly onboardingRepository: OnboardingRepository) {}
 
-  create(createOnboardingPageWithImageDto: CreateOnboardingPageWithImageDto) {
+  create(createOnboardingPageWithImageDto: ICreateOnboardingPageWithImage) {
     return this.onboardingRepository.create(createOnboardingPageWithImageDto);
   }
 

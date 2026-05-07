@@ -7,17 +7,22 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OnboardingModule } from './modules/onboarding/onboarding.module';
 import { FileUploadModule } from './common/services/file-upload-service/file-upload.module';
-import { MailerModule } from '@nestjs-modules/mailer'
+import { MailerModule } from '@nestjs-modules/mailer';
 import { ScheduleModule } from '@nestjs/schedule';
 import { BullModule } from '@nestjs/bull';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { FoodRecommendationsModule } from './modules/food-recomendations/food-recomendations.module';
+import { HomeModule } from './modules/home/home.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { SubCategoriesModule } from './modules/sub-categories/sub-categories.module';
+import { ExercisesModule } from './modules/exercises/exercises.module';
+import { SeedService } from './DB/seeder/seeder.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-     ScheduleModule.forRoot(),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -46,7 +51,7 @@ import { FoodRecommendationsModule } from './modules/food-recomendations/food-re
         },
       }),
     }),
-      BullModule.forRoot({
+    BullModule.forRoot({
       redis: {
         host: 'localhost',
         port: 6379,
@@ -58,8 +63,12 @@ import { FoodRecommendationsModule } from './modules/food-recomendations/food-re
     FileUploadModule,
     JobsModule,
     FoodRecommendationsModule,
+    HomeModule,
+    CategoriesModule,
+    SubCategoriesModule,
+    ExercisesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, SeedService],
 })
-export class AppModule { }
+export class AppModule {}

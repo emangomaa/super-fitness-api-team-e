@@ -16,7 +16,7 @@ export class UserProfile {
   id: number;
 
   @OneToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn()
+  @JoinColumn({ name: 'userId' })
   user: User;
 
   @Column({ nullable: true })

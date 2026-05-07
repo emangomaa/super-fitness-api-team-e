@@ -17,6 +17,9 @@ export class UsersService {
     private readonly userRepo: UsersRepository,
   ) {}
 
+  // ======================
+  // CREATE USER
+  // ======================
   async createUser(dto: CreateUserDto) {
     const existingUser = await this.userRepo.findOne('e.email = :email', {
       email: dto.email,
@@ -28,18 +31,20 @@ export class UsersService {
 
     const hashedPassword = await hashPassword(dto.password);
 
-    const user = await this.userRepo.create({
+    return this.userRepo.create({
       ...dto,
       password: hashedPassword,
     });
-
-    return user;
   }
 
+  // ======================
+  // GET OR CREATE PROFILE
+  // ======================
   async getOrCreateProfile(userId: string) {
-    let profile = await this.usersProfileRepository.findOne('user_id = $1', [
-      userId,
-    ]);
+    let profile = await this.usersProfileRepository.findOne(
+      'e.userId = :userId',
+      { userId },
+    );
 
     if (!profile) {
       profile = await this.usersProfileRepository.create({
@@ -51,85 +56,150 @@ export class UsersService {
     return profile;
   }
 
-  // 🔥 update gender
+  // ======================
+  // UPDATE GENDER
+  // ======================
   async updateGender(userId: string, gender: Gender) {
-    return this.usersProfileRepository.update('user_id = $1', [userId], {
-      gender,
-      registration_step: 1,
-    });
+    let profile = await this.usersProfileRepository.findOne(
+      'e.userId = :userId',
+      { userId },
+    );
+
+    if (profile) {
+      profile = await this.usersProfileRepository.create({
+        user: { id: userId } as User,
+        gender,
+        registration_step: 1,
+      });
+    }
+
+    return profile;
   }
 
-  // 🔥 update age
+  // ======================
+  // UPDATE AGE
+  // ======================
   async updateAge(userId: string, age: number) {
-    return this.usersProfileRepository.update('user_id = $1', [userId], {
-      age,
-      registration_step: 2,
-    });
+    const profile = await this.usersProfileRepository.findOne(
+      'e.userId = :userId',
+      { userId },
+    );
+
+    if (profile) {
+      profile.age = age;
+      profile.registration_step = 2;
+    }
+
+    return profile;
   }
 
-  // 🔥 update weight
+  // ======================
+  // UPDATE WEIGHT
+  // ======================
   async updateWeight(userId: string, weight: number) {
-    return this.usersProfileRepository.update('user_id = $1', [userId], {
-      weight,
-      registration_step: 3,
-    });
+    const profile = await this.usersProfileRepository.findOne(
+      'e.userId = :userId',
+      { userId },
+    );
+
+    if (profile) {
+      profile.weight = weight;
+      profile.registration_step = 3;
+
+      return this.usersProfileRepository.create(profile);
+    }
+
+    return profile;
   }
 
-  // 🔥 update height
+  // ======================
+  // UPDATE HEIGHT
+  // ======================
   async updateHeight(userId: string, height: number) {
-    return this.usersProfileRepository.update('user_id = $1', [userId], {
-      height,
-      registration_step: 4,
-    });
+    const profile = await this.usersProfileRepository.findOne(
+      'e.userId = :userId',
+      { userId },
+    );
+
+    if (profile) {
+      profile.height = height;
+      profile.registration_step = 4;
+    }
+
+    return profile;
   }
 
-  // 🔥 update goal
+  // ======================
+  // UPDATE GOAL
+  // ======================
   async updateGoal(userId: string, goal: UserGoal) {
-    return this.usersProfileRepository.update('user_id = $1', [userId], {
-      goal,
-      registration_step: 5,
-    });
+    const profile = await this.usersProfileRepository.findOne(
+      'e.userId = :userId',
+      { userId },
+    );
+
+    if (profile) {
+      profile.goal = goal;
+      profile.registration_step = 5;
+      return this.usersProfileRepository.create(profile);
+    }
+
+    return profile;
   }
 
-  // 🔥 update activity level
+  // ======================
+  // UPDATE ACTIVITY LEVEL
+  // ======================
   async updateActivityLevel(userId: string, activityLevel: ActivityLevel) {
-    return this.usersProfileRepository.update('user_id = $1', [userId], {
-      activity_level: activityLevel,
-      registration_step: 6,
-    });
+    let profile = await this.usersProfileRepository.findOne(
+      'e.userId = :userId',
+      { userId },
+    );
+
+    if (profile) {
+      profile.activity_level = activityLevel;
+      profile.registration_step = 6;
+      profile = await this.usersProfileRepository.create(profile);
+    }
+
+    return profile;
   }
 
+  // ======================
+  // VALIDATE USER
+  // ======================
   async validateUser(data: LoginDto): Promise<User> {
     const { email, password } = data;
+
     const user = await this.userRepo.findOne('e.email = :email', {
-      email: email,
+      email,
     });
+
     if (!user) {
       console.log("login user")
       throw new Error('Invalid credentials');
     }
+
     const isPasswordValid = await comparePassword(password, user.password);
+    console.log(isPasswordValid);
+
     if (!isPasswordValid) {
       console.log("login password")
       throw new Error('Invalid credentials');
     }
+
     return user;
   }
 
-
-
-
-
-
-
   UserExistsByEmail = async (email: string): Promise<User> => {
-
     const user = await this.userRepo.findOne('e.email = :email', {
-      email: email,
+      email,
     });
+
     if (!user) {
       throw new Error('Invalid credentials');
     }
+
     return user;
   }
 
@@ -173,4 +243,5 @@ export class UsersService {
 
     return Math.round(calories);
   }
+  };
 }

@@ -1,4 +1,4 @@
-import { Controller, Body, Patch, Req, Post } from '@nestjs/common';
+import { Controller, Body, Patch, Req, Post, Get } from '@nestjs/common';
 import { UsersService } from './users.service';
 import type { AuthRequest } from '../../common/types/req.type';
 import type { Gender } from './dto/gender.type';
@@ -100,5 +100,10 @@ export class UsersController {
       "dab1afcc-43f1-4494-8b3e-7a60d220033c",
       updateProfileDto,
     );
+
+  @Get("get-user-data")
+  getUserData(@Req() req: AuthRequest) {
+    const userId = req.user.id;
+    return this.usersService.getUserData(userId);
   }
 }

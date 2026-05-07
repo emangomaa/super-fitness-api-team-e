@@ -1,7 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, BeforeInsert } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  BeforeInsert,
+} from 'typeorm';
 import { UserProfile } from './complete.register.entity';
 import { UserRole } from '../../../common/constants/user-role.constants';
-import { hashPassword } from '../../../common/security/hash.util';
 
 @Entity('users')
 export class User {
@@ -27,13 +32,11 @@ export class User {
   })
   role: UserRole;
 
-  @OneToOne(() => UserProfile, (profile) => profile.user, {
-    cascade: true,
-  })
-
-
-  @BeforeInsert()
-  async hashPassword() {
-    this.password = await hashPassword(this.password);
-  }
+  // @OneToOne(() => UserProfile, (profile) => profile.user, {
+  //   cascade: true,
+  // })
+  // @BeforeInsert()
+  // async hashPassword() {
+  //   this.password = await hashPassword(this.password);
+  // }
 }

@@ -36,6 +36,7 @@
     "@nestjs/swagger": "^11.3.2",
     "@nestjs/typeorm": "^11.0.1",
     "@types/nodemailer": "^8.0.0",
+    "axios": "^1.16.0",
     "bcrypt": "^6.0.0",
     "bull": "^4.16.5",
     "class-transformer": "^0.5.1",
