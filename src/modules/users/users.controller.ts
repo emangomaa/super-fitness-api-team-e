@@ -9,6 +9,9 @@ import {
   UpdateGoalDto,
 } from './dto/update-goal-and-activity.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Public } from '../../common/decorators/public_decorator';
 
 @Controller('users')
 @ApiBearerAuth()
@@ -82,6 +85,20 @@ export class UsersController {
     return this.usersService.updateActivityLevel(
       userId,
       updateActivityLevelDto.activityLevel,
+    );
+  }
+
+  @Patch('update-profile')
+  @ApiBody({ type: UpdateProfileDto })
+@Public()
+  updateUserProfile(
+    @Req() req: AuthRequest,
+    @Body() updateProfileDto: UpdateProfileDto,
+  ) {
+    // const userId = req.user.id;
+    return this.usersService.updateUserProfile(
+      "dab1afcc-43f1-4494-8b3e-7a60d220033c",
+      updateProfileDto,
     );
   }
 }

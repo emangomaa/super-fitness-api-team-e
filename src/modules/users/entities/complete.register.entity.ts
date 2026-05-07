@@ -46,6 +46,10 @@ export class UserProfile {
   activity_level: ActivityLevel;
 
   @Column({ default: 0 })
+  daily_calories: number;
+
+
+  @Column({ default: 0 })
   registration_step: number;
 
   @CreateDateColumn()

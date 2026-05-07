@@ -11,6 +11,7 @@ import { MailerModule } from '@nestjs-modules/mailer'
 import { ScheduleModule } from '@nestjs/schedule';
 import { BullModule } from '@nestjs/bull';
 import { JobsModule } from './modules/jobs/jobs.module';
+import { FoodRecommendationsModule } from './modules/food-recomendations/food-recomendations.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -55,7 +56,8 @@ import { JobsModule } from './modules/jobs/jobs.module';
     AuthModule,
     OnboardingModule,
     FileUploadModule,
-    JobsModule
+    JobsModule,
+    FoodRecommendationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
