@@ -15,15 +15,16 @@ export class FoodRecommendationService {
 
   async recommend(userId: string, mealType: string) {
     const user = await this.userService.getOrCreateProfile(userId);
-
+    console.log('User id:', userId); // Debugging log
+console.log('User Profile:', user); // Debugging log
     const foods = await this.foodProviderService.fetchFoods(user, mealType);
 
     return foods
       .map(food => ({
         ...food,
-        // score: this.scoreFood(food, user, mealType),
+        score: this.scoreFood(food, user, mealType),
       }))
-    //   .sort((a, b) => b.score - a.score)
+      .sort((a, b) => b.score - a.score)
       .slice(0, 10);
   }
 
@@ -53,7 +54,7 @@ export class FoodRecommendationService {
     // 🎯 Goal Score (20)
     let goalScore = 0;
     if (user.goal === UserGoal.GAIN_WEIGHT && food.tags.includes('high_calorie'))
-      goalScore = 20;
+      goalScore = 40;
     if (user.goal === UserGoal.LOSE_WEIGHT && food.tags.includes('low_calorie'))
       goalScore = 20;
 
