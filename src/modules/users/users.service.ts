@@ -208,7 +208,8 @@ export class UsersService {
 
   async updateUserProfile(userId: string, dto: UpdateProfileDto) {
     const dailyCalories = await this.calculateDailyCalories(dto);
-    return this.usersProfileRepository.update('user_id = $1', [userId], {
+
+    return this.usersProfileRepository.update('"userId"= :userId', { userId }, {
       gender: dto.gender,
       age: dto.age,
       weight: dto.weight,
@@ -244,4 +245,3 @@ export class UsersService {
     return Math.round(calories);
   }
   };
-}

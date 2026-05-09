@@ -68,13 +68,7 @@ export class UpdateProfileDto {
     @IsEnum(ActivityLevel)
   activityLevel: ActivityLevel;
 
-@ApiProperty({
-    description: 'The daily calories needed for the user to achieve their goal',
-    example: 2000,
-    type: Number,
-  })
-  @IsNumber()
-  daily_calories: number;
+
 
 }
 

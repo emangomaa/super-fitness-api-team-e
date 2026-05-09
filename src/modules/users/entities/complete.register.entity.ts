@@ -19,16 +19,16 @@ export class UserProfile {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   gender: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'int', nullable: true })
   age: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'float', nullable: true })
   weight: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'float', nullable: true })
   height: number;
 
   @Column({
@@ -45,7 +45,7 @@ export class UserProfile {
   })
   activity_level: ActivityLevel;
 
-  @Column({ default: 0 })
+  @Column({ type: 'float', default: 0 })
   daily_calories: number;
 
 
